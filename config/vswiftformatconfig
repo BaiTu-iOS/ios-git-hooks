@@ -1,0 +1,87 @@
+# file options
+
+--exclude Tests/XCTestManifests.swift,Tests/BadConfig,Snapshots,Build,PluginTests
+
+# format options
+
+--allman false
+--binarygrouping 4,8
+--commas always
+--decimalgrouping 3,6
+--elseposition same-line
+--voidtype void
+--exponentcase lowercase
+--exponentgrouping disabled
+--fractiongrouping disabled
+--header ignore
+--hexgrouping 4,8
+--hexliteralcase uppercase
+--ifdef indent
+--indent 4
+--tabwidth 4
+--indentcase false
+--importgrouping testable-bottom
+--linebreaks lf
+--maxwidth none
+--octalgrouping 4,8
+--operatorfunc spaced
+--patternlet hoist
+--ranges preserve
+--self remove
+--semicolons inline
+--stripunusedargs always
+--swiftversion 5.3 # TODO: Update to 5.7 after releasing Swift Format 0.56.0
+--trimwhitespace always
+--wraparguments before-first
+--wrapcollections preserve
+--wrapconditions preserve
+--typeblanklines preserve
+--propertytypes explicit
+--emptybraces spaced
+--lineaftermarks false
+--xcodeindentation enabled
+--smarttabs enabled
+
+# --enable isEmpty
+
+--disable wraparguments 
+--disable headerFileName 
+--disable redundantSelf # 冗余 self 
+--disable wrapMultilineStatementBraces # 包裹多行语句的左括号
+--disable redundantReturn # 移除多余 return 
+--disable unusedArguments # 用 _ 标记未使用的函数参数
+--disable initCoderUnavailable # 初始化编码器不可用
+--disable hoistPatternLet # 在模式内重新定位 let 或 var 绑定
+--disable redundantPattern # 删除冗余模式匹配参数语法
+--disable trailingClosures # 尾随闭包
+--disable andOperator # 与运算符用,替换
+--disable blankLinesBetweenImports # 导入之间的空白行
+--disable blockComments # 将块注释转换为连续的单行注释
+--disable trailingSpace # 尾随空格
+--disable redundantType # 类似推断
+--disable blankLinesAtStartOfScope # 开始空行
+--disable spaceInsideComments # 注释内空格
+--disable sortImports # 导入排序
+--disable redundantParens # 冗余括号
+--disable emptyBraces # 空实现
+--disable redundantBreak # 多余的 break
+--disable todos # todo 
+--disable indent # 缩进
+--disable modifierorder # 修饰符顺序
+--disable redundantGet # 冗余获取
+--disable redundantInit  # 冗余初始化
+--disable extensionAccessControl # 扩展访问控制
+--disable consecutiveSpaces # 应为有转模型，暂时关闭了
+--disable applicationMain # 应用程序主程序 @main 替换 @UIApplicationMain
+--disable redundantFileprivate  # 冗余文件私有 private 替换 Fileprivate
+--disable trailingCommas # 末尾逗号
+--disable preferKeyPath # key path
+--disable preferForLoop # foreach 改为 for in
+
+
+
+
+
+# --disable  consecutiveBlankLines,spaceAroundOperators, blankLinesAtEndOfScope,blankLinesBetweenScopes,spaceAroundBraces # 测试
+
+# swiftformat --lint --config /Users/nor/gitglobalconfig/hooks/swiftformatconfig test

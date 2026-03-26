@@ -1,0 +1,56 @@
+#!/bin/sh
+
+VERSION="1.1.0"
+OCRET=0    # oc 的结果
+SWIFTRET=0 # swift 结果
+
+# 获取脚本所在目录（hooks/）
+HOOKS_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+vshow_oc_format() { # oc 格式检查
+    ocformat="$HOOKS_DIR/ocformat"
+    chmod +x "$ocformat"
+
+    /bin/bash "$ocformat"
+    OCRET=$?
+}
+
+vshow_swift_format() { # swift 格式检查
+    swiftformat="$HOOKS_DIR/vswiftformat"
+    chmod +x "$swiftformat"
+
+    /bin/bash "$swiftformat"
+    SWIFTRET=$?
+}
+
+CHECKSENSITIVEWORDSRET=0 # 敏感词检查
+check_sensitive_words() { # 敏感词
+    checksensitivewords="$HOOKS_DIR/check-sensitive-words"
+    chmod +x "$checksensitivewords"
+    /bin/bash "$checksensitivewords"
+    CHECKSENSITIVEWORDSRET=$?
+}
+
+case "$1" in
+  --version|-v)
+    echo "Version: $VERSION"
+    exit 0
+    ;;
+  *)
+    # 主逻辑
+    check_sensitive_words
+    if [ "$CHECKSENSITIVEWORDSRET" -ne 0 ]; then
+        echo "❌ 敏感词检查错误"
+        exit 1
+    fi
+
+    vshow_oc_format
+    vshow_swift_format
+
+    if [ "$OCRET" -eq 0 ] && [ "$SWIFTRET" -eq 0 ]; then
+        exit 0
+    else
+        exit 1
+    fi
+    ;;
+esac

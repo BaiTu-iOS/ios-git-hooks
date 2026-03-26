@@ -1,0 +1,42 @@
+#!/bin/sh
+
+# format 配置文件路径（相对脚本目录）
+HOOKS_DIR="$(cd "$(dirname "$0")" && pwd)"
+ROOT_DIR="$(dirname "$HOOKS_DIR")"
+FormatConfigFile="$ROOT_DIR/config/vswiftformatconfig"
+FormatCommand="swiftformat"
+
+# 定义缓存路径
+TempPath="${HOME}/Library/Caches/vshow/"
+mkdir -p "$TempPath"
+
+# 定义 format 输出文件
+FormatOutputFile="${TempPath}swift-format-output.log"
+
+# 获取所有暂存的 swift 源文件
+StagedFiles=$(git diff --cached --name-status | grep -E '^[AM]' | cut -f2- | grep -E '\.(swift)$')
+if [ -z "$StagedFiles" ]; then
+  exit 0
+fi
+
+# 检查暂存区未未提交文件
+if ! git diff --quiet $StagedFiles; then
+  echo "⚠️ 存在未暂存修改，可能导致格式检查不准确"
+  echo "请先 git add 相关文件后再提交"
+  exit 1
+fi
+
+"$FormatCommand" --lint --config "$FormatConfigFile" $StagedFiles --report $FormatOutputFile --reporter github-actions-log --quiet
+RET=$?
+
+if [ "$RET" -eq 0 ]; then
+  echo "✅ Swift代码校验通过！"
+  echo ""
+  exit 0
+else
+  echo "❌ 检测到格式问题，详情见:"
+  echo "===================================="
+  echo "$(cat "${FormatOutputFile}")"
+  echo "===================================="
+  exit 1
+fi

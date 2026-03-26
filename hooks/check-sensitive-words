@@ -1,0 +1,12 @@
+#!/bin/sh
+# 敏感词检查 —— 委托给 check_blocked_words.py 的 compound 语义匹配引擎
+# 支持驼峰/下划线复合词边界识别，避免 grep -w 的误判
+
+HOOKS_DIR="$(cd "$(dirname "$0")" && pwd)"
+CHECKER="$HOOKS_DIR/check_blocked_words.py"
+
+git diff -U0 --cached --no-color --relative HEAD -- \
+  '*.h' '*.m' '*.mm' '*.swift' '*.c' '*.cpp' | \
+  python3 "$CHECKER" --diff-stdin --skip-comments
+
+exit $?

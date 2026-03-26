@@ -1,0 +1,112 @@
+#!/bin/sh
+
+OUT_ERR=0
+
+parse_git_diff() {
+    diff_file="$1"
+    current_file=""
+    current_num=0
+    numArr=()
+    addArr=()
+    delArr=()
+    pre_check=""
+    output_changes() {
+        if ((${#numArr[@]} > 0)); then
+            for ((i = 0; i < ${#numArr[@]}; i++)); do
+                echo "🔔 $current_file:${numArr[$i]}"
+                if [[ -n ${addArr[0]} ]]; then
+                    DEL_LINE=${delArr[0]}
+                    echo "请修改："
+                    echo "$DEL_LINE"
+                    echo "${addArr[0]}"
+                    echo ""
+                    addArr=("${addArr[@]:1}")
+                    delArr=("${delArr[@]:1}")
+                else
+                    echo "请删除行！"
+                    echo ""
+                    delArr=("${delArr[@]:1}")
+                fi
+            done
+            numArr=()
+            addArr=()
+            delArr=()
+            OUT_ERR=1
+        fi
+    }
+    if [ ! -f "$diff_file" ]; then
+        echo "错误: 文件 '$diff_file' 不存在"
+        exit 1
+    fi
+    while IFS= read -r line || [[ -n $line ]]; do
+        if [[ $line =~ ^\+\+\+\ (.*)\  ]]; then
+            pre_check="+++"
+            if [ -n "$current_file" ]; then
+                output_changes
+            fi
+            current_file=$(echo "$line" | awk '{print $2}')
+            continue
+        elif [[ $line =~ \+([0-9]+) ]]; then
+            pre_check="@@"
+            matched_num=${BASH_REMATCH[1]}
+            if [[ $line =~ ^@@ ]]; then
+                # 新块开始
+                output_changes
+                current_num=$matched_num
+                continue
+            fi
+        fi
+        # diff内容处理
+        if [[ $line =~ ^- ]] && [[ ! $line =~ ^[+-]{3} ]]; then
+            pre_check="-"
+            numArr+=("$current_num")
+            delArr+=("$line")
+            current_num=$((current_num + 1))
+        elif [[ $line =~ ^\+ ]] && [[ ! $line =~ ^[+-]{3} ]]; then
+            pre_check="+"
+            addArr+=("$line")
+        elif [[ ! $line =~ ^@@ ]]; then
+            current_num=$((current_num + 1))
+            if [[ $pre_check = "+" ]] || [[ $pre_check = "-" ]]; then
+                output_changes
+            fi
+        fi
+    done <"$diff_file"
+    # 文件结尾处理
+    output_changes
+}
+
+# clang-format 配置文件路径（相对脚本目录）
+HOOKS_DIR="$(cd "$(dirname "$0")" && pwd)"
+ROOT_DIR="$(dirname "$HOOKS_DIR")"
+FormatConfigFile="$ROOT_DIR/config/clang-format-config"
+
+# 定义缓存路径
+TempPath="${HOME}/Library/Caches/vshow/"
+mkdir -p "$TempPath"
+
+# 定义 clang-format 输出文件
+FormatOutputFile="${TempPath}clang-format-output.temp"
+
+# 删除旧的输出文件（如果存在）
+if [ -f "$FormatOutputFile" ]; then
+  rm "$FormatOutputFile"
+  # echo "🗑️ 已删除旧文件: $FormatOutputFile"
+fi
+
+# 执行 clang-format 检查并写入输出
+git diff -U0 --relative HEAD -- 'BT*.cpp' 'BT*.h' 'BT*.m' 'BT*.mm' |
+  "$(xcrun --find clang-format-diff.py)" -p1 -binary "$(xcrun --find clang-format)" -style="file:${FormatConfigFile}" \
+  > $FormatOutputFile
+
+parse_git_diff "$FormatOutputFile"
+
+# 判断是否有格式化输出
+if [ "$OUT_ERR" -eq 0 ]; then
+  echo "✅ Objective-C代码校验通过！"
+  echo ""
+  exit 0
+else
+  echo "❌ 代码格式校验不通过！详情见: $FormatOutputFile"
+  exit 1
+fi
