@@ -30,14 +30,14 @@ AlignOperands: DontAlign
 
 # 尾随注释对齐
 AlignTrailingComments:
-  Kind: Leave 
-  OverEmptyLines: 2
+  Kind: Leave
+  OverEmptyLines: 1
 
 # 行限制
-ColumnLimit: 0
+ColumnLimit: 120
 
 # 最多保留 1 个空行
-MaxEmptyLinesToKeep: 2
+MaxEmptyLinesToKeep: 1
 
 # 保持块开始的空行：启用
 KeepEmptyLinesAtTheStartOfBlocks: true
@@ -69,8 +69,8 @@ BraceWrapping:
 # 允许短代码在一行
 AllowShortBlocksOnASingleLine: Empty
 
-# 允许 if 在一行
-AllowShortIfStatementsOnASingleLine: OnlyFirstIf
+# 禁止 if 写成一行，避免漏写大括号导致的 bug
+AllowShortIfStatementsOnASingleLine: Never
 
 AllowShortFunctionsOnASingleLine: None
 
