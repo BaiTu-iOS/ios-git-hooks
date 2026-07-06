@@ -7,6 +7,9 @@ Language: ObjC
 # 指针和引用的对齐方式
 PointerAlignment: Right
 
+# C-style cast 后不加空格： (id<Protocol>)self
+SpaceAfterCStyleCast: false
+
 # 用于缩进的列数
 IndentWidth: 4
 
