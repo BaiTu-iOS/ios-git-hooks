@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VERSION="1.1.0"
+VERSION="1.2.0"
 OCRET=0    # oc 的结果
 SWIFTRET=0 # swift 结果
 

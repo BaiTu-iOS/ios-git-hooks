@@ -1,26 +1,28 @@
-# file options
+# ════════════════════════════════════════════════════════════
+# SwiftFormat 配置
+# 校验: swiftformat --lint --config <本文件> <路径>
+# ════════════════════════════════════════════════════════════
+
+# ── file options ──
 
 --exclude Tests/XCTestManifests.swift,Tests/BadConfig,Snapshots,Build,PluginTests
 
-# format options
+# ── format options（对应规则已启用，实际生效）──
 
 --allman false
 --binarygrouping 4,8
 --commas always
 --decimalgrouping 3,6
 --elseposition same-line
---voidtype void
+--emptybraces no-space
 --exponentcase lowercase
 --exponentgrouping disabled
 --fractiongrouping disabled
 --header ignore
 --hexgrouping 4,8
 --hexliteralcase uppercase
---ifdef indent
---indent 4
---tabwidth 4
---indentcase false
 --importgrouping testable-bottom
+--lineaftermarks false
 --linebreaks lf
 --maxwidth 120
 --octalgrouping 4,8
@@ -30,58 +32,42 @@
 --self remove
 --semicolons inline
 --stripunusedargs always
---swiftversion 5.9
+--swiftversion 6.2
+
+# ── 以下选项依赖 indent / trailingSpace / wrapArguments 规则，
+#    这些规则因「生成代码/转模型」被刻意禁用（见底部），故当前不生效，
+#    保留以记录预期值，便于将来对生成目录改用 --exclude 后再启用 ──
+
+--indent 4
+--tabwidth 4
+--indentcase false
+--ifdef indent
+--xcodeindentation enabled
+--smarttabs enabled
 --trimwhitespace always
 --wraparguments before-first
 --wrapcollections preserve
 --wrapconditions preserve
 --typeblanklines preserve
---propertytypes explicit
---emptybraces spaced
---lineaftermarks false
---xcodeindentation enabled
---smarttabs enabled
 
-# --enable isEmpty
+# ── disabled rules ──
 
---disable wraparguments 
---disable headerFileName 
---disable redundantSelf # 冗余 self 
---disable wrapMultilineStatementBraces # 包裹多行语句的左括号
---disable redundantReturn # 移除多余 return 
---disable unusedArguments # 用 _ 标记未使用的函数参数
---disable initCoderUnavailable # 初始化编码器不可用
---disable hoistPatternLet # 在模式内重新定位 let 或 var 绑定
---disable redundantPattern # 删除冗余模式匹配参数语法
---disable trailingClosures # 尾随闭包
---disable andOperator # 与运算符用,替换
---disable blankLinesBetweenImports # 导入之间的空白行
---disable blockComments # 将块注释转换为连续的单行注释
---disable trailingSpace # 尾随空格
---disable redundantType # 类似推断
---disable blankLinesAtStartOfScope # 开始空行
---disable spaceInsideComments # 注释内空格
---disable sortImports # 导入排序
---disable redundantParens # 冗余括号
---disable emptyBraces # 空实现
---disable redundantBreak # 多余的 break
---disable todos # todo 
---disable indent # 缩进
---disable modifierorder # 修饰符顺序
---disable redundantGet # 冗余获取
---disable redundantInit  # 冗余初始化
---disable extensionAccessControl # 扩展访问控制
---disable consecutiveSpaces # 应为有转模型，暂时关闭了
---disable applicationMain # 应用程序主程序 @main 替换 @UIApplicationMain
---disable redundantFileprivate  # 冗余文件私有 private 替换 Fileprivate
---disable trailingCommas # 末尾逗号
---disable preferKeyPath # key path
---disable preferForLoop # foreach 改为 for in
+# 生成代码/转模型相关：全局格式化会破坏生成代码，刻意禁用
+# （正解是给生成目录加 --exclude 后再启用，此处按团队现状保守保留）
+--disable indent              # 缩进
+--disable trailingSpace       # 尾随空格
+--disable consecutiveSpaces   # 连续空格（转模型对齐）
+--disable redundantType       # 保留模型属性的显式类型
 
+# 依赖 indent：indent 关闭时启用会产生错误缩进，故一并禁用
+--disable wrapArguments
+--disable wrapMultilineStatementBraces
 
+# opt-in / 有副作用：按最佳实践保持关闭
+--disable trailingClosures            # 可能改变语义
+--disable blockComments               # 块注释转行注释，过于激进
+--disable blankLinesBetweenImports
+--disable headerFileName              # header=ignore，规则无意义
 
-
-
-# --disable  consecutiveBlankLines,spaceAroundOperators, blankLinesAtEndOfScope,blankLinesBetweenScopes,spaceAroundBraces # 测试
-
-# swiftformat --lint --config /Users/nor/gitglobalconfig/hooks/swiftformatconfig test
+# 入口点安全：禁止格式化 hook 静默替换 @UIApplicationMain
+--disable applicationMain

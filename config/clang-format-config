@@ -1,32 +1,57 @@
 # 工具 https://github.com/mapbox/XcodeClangFormat(需要添加签名使用)
-# 函数名详细地址 英文 http://clang.llvm.org/docs/ClangFormatStyleOptions.html
-# 函数名详细地址 中文 https://www.cnblogs.com/PaulpauL/p/5929753.html
+# 选项详细说明 英文 http://clang.llvm.org/docs/ClangFormatStyleOptions.html
+# 选项详细说明 中文 https://www.cnblogs.com/PaulpauL/p/5929753.html
+#
+# ⚠️ 本文件与 ios-dev-rules 插件的 rules/objectivec/.clang-format 保持一致。
+#    修改任一份后，必须用以下命令确认两者 dump 结果逐字节相同：
+#    clang-format --assume-filename=x.m --style="file:<配置路径>" --dump-config
 
+BasedOnStyle: LLVM
 Language: ObjC
 
-# 指针和引用的对齐方式
-PointerAlignment: Right
-
-# C-style cast 后不加空格： (id<Protocol>)self
-SpaceAfterCStyleCast: false
+# ── 缩进 ──
 
 # 用于缩进的列数
 IndentWidth: 4
 
+# tab 宽度
+TabWidth: 4
+
 # 针对OC的block的缩进宽度
 ObjCBlockIndentWidth: 4
-
-# OC的block嵌套参数不换行
-ObjCBreakBeforeNestedBlockParam: false
 
 # switch的case缩进
 IndentCaseLabels: true
 
+# ── ObjC 特有 ──
+
 # OC里面，在@property后加空格
 ObjCSpaceAfterProperty: false
 
-#import / #include 语句进行重新排序
+# 协议列表前加空格： id<Protocol> 写作 id <Protocol>
+ObjCSpaceBeforeProtocolList: true
+
+# OC的block嵌套参数不换行
+ObjCBreakBeforeNestedBlockParam: false
+
+# 不重排 #import / #include（ObjC 重排会破坏 umbrella header 顺序）
 SortIncludes: false
+
+# 指针和引用的对齐方式（ObjC 惯例 NSString *str）
+PointerAlignment: Right
+
+# ── 列宽 ──
+
+# 0 = 关闭按列宽自动重排（不合并/不拆分行），只做缩进与对齐。
+# 与 Xcode Ctrl+I（纯再缩进、从不合并/拆分行）同哲学，避免手写多行消息发送
+# 被折叠成一行后又被 Ctrl+I 改回，来回打架。
+# 120 列降级为人工把控的软目标，不由 clang-format 强制折行。
+ColumnLimit: 0
+
+# ── 对齐 ──
+
+# 左括号后对齐
+AlignAfterOpenBracket: Align
 
 # 对齐操作数
 AlignOperands: DontAlign
@@ -36,47 +61,77 @@ AlignTrailingComments:
   Kind: Leave
   OverEmptyLines: 1
 
-# 行限制
-ColumnLimit: 120
+# ── 空行控制 ──
 
 # 最多保留 1 个空行
 MaxEmptyLinesToKeep: 1
 
-# 保持块开始的空行：启用
+# 保留块开始处的空行（贴近 Ctrl+I 编辑习惯，不主动删）
 KeepEmptyLinesAtTheStartOfBlocks: true
 
-# 保持文件末尾的空行：不保持
-KeepEmptyLinesAtEOF: true
+# 不保留文件末尾的空行（配合 InsertNewlineAtEOF 保证结尾有且仅有一个换行）
+KeepEmptyLinesAtEOF: false
 
-# 大括号换行
+# 文件末尾自动补一个换行
+InsertNewlineAtEOF: true
+
+# ── 大括号换行 ──
+
 BreakBeforeBraces: Custom
 BraceWrapping:
-  # class定义后面
+  # class定义后面（Allman）
   AfterClass: true
-  # 控制语句后面
+  # 控制语句后面（K&R）
   AfterControlStatement: false
-  # enum定义后面
+  # enum定义后面（K&R）
   AfterEnum: false
-  # 函数定义后面
+  # 函数/方法定义后面（Allman）
   AfterFunction: true
-  # 命名空间定义后面
+  # 命名空间定义后面（K&R）
   AfterNamespace: false
-  # struct定义后面
+  # @interface / @implementation 后面（Allman）
+  AfterObjCDeclaration: true
+  # struct定义后面（K&R）
   AfterStruct: false
-  # union定义后面
+  # union定义后面（K&R）
   AfterUnion: false
-  # catch之前
+  # else之前不换行： } else {
+  BeforeElse: false
+  # catch之前不换行
   BeforeCatch: false
+  # 空函数不拆行 {}
   SplitEmptyFunction: false
 
-# 允许短代码在一行
-AllowShortBlocksOnASingleLine: Empty
+# ── 单行控制 ──
+
+# 禁止单行 block 折叠（^{ stmt; } 强制展开，连空 block 也展开）
+AllowShortBlocksOnASingleLine: Never
+
+# 只允许空函数体写成一行 {}
+AllowShortFunctionsOnASingleLine: Empty
 
 # 禁止 if 写成一行，避免漏写大括号导致的 bug
 AllowShortIfStatementsOnASingleLine: Never
 
-AllowShortFunctionsOnASingleLine: None
+# 禁止单行 for/while
+AllowShortLoopsOnASingleLine: false
 
-# 重排注释
+# 禁止 NS_ENUM 折叠成一行
+AllowShortEnumsOnASingleLine: false
+
+# ── 空格 ──
+
+# 控制语句关键字后加空格： if (x)，函数名后不加： foo()
+SpaceBeforeParens: ControlStatements
+
+# C-style cast 后不加空格： (id<Protocol>)self
+SpaceAfterCStyleCast: false
+
+# 容器字面量 @[]/@{} 内侧不加空格：@[_a, _b] 而非 @[ _a, _b ]，
+# 字典 @{k: v} 而非 @{ k : v }（对齐 Xcode/主流 ObjC 紧凑风格）
+SpacesInContainerLiterals: false
+
+# ── 注释 ──
+
+# 不重排注释
 ReflowComments: false
-
