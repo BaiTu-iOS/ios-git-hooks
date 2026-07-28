@@ -91,7 +91,7 @@ show_result() {
     echo "========================================="
     echo ""
     echo "功能包含："
-    echo "  • Objective-C 代码格式检查（clang-format）"
+    echo "  • Objective-C 代码格式检查（clang-format → Xcode 等价缩进）"
     echo "  • Swift 代码格式检查（swiftformat）"
     echo "  • 敏感词检查（compound 语义匹配）"
     echo ""

@@ -14,7 +14,7 @@ curl -fsSL https://raw.githubusercontent.com/BaiTu-iOS/ios-git-hooks/main/instal
 
 | 检查项 | 说明 |
 |--------|------|
-| OC 格式检查 | 基于 clang-format，检查 `BT*.h/m/mm/cpp` 文件 |
+| OC 格式检查 | `clang-format → xcindent` 组合校验，仅检查 `BT*.h/m/mm/cpp` 改动行；缩进对齐 Xcode Ctrl+I |
 | Swift 格式检查 | 基于 swiftformat，检查暂存的 `.swift` 文件 |
 | 敏感词检查 | compound 语义匹配，支持驼峰/下划线复合词边界识别 |
 
@@ -54,6 +54,20 @@ git config --global --unset core.hooksPath && rm -rf ~/.local/bin/git_hooks
 
 编辑 `config/clang-format-config`。
 
+OC 门禁先让 clang-format 处理空格、大括号和指针位置，再由内置
+`hooks/xcindent.py` 对同一批改动行做缩进收尾。后者只改行首空白，
+用于解决尾随消息 block body 被 clang-format 推到参数列深缩进的问题。
+内置引擎同步自 `wk-xcindent 1.0.1`，已通过 35 个真实 Xcode 26.6
+oracle golden 用例校准。
+
+检查过程完全在内存中完成，只输出建议 diff，不会直接修改工作区文件。
+
 ### 修改 Swift 格式规则
 
 编辑 `config/vswiftformatconfig`。
+
+### 运行回归
+
+```bash
+python3 -m unittest discover -s tests -v
+```
