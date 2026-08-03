@@ -110,8 +110,11 @@ AllowShortBlocksOnASingleLine: Never
 # 只允许空函数体写成一行 {}
 AllowShortFunctionsOnASingleLine: Empty
 
-# 禁止 if 写成一行，避免漏写大括号导致的 bug
-AllowShortIfStatementsOnASingleLine: Never
+# 允许无 else 的短 guard clause（如 if (!data) return;）保持单行。
+# 不能用 Never：本管线在 clang-format 之后还要跑 xcindent（纯按花括号深度再缩进），
+# braceless if 拆行后 body 没有花括号，会被退回与 if 同级 —— 产出「两行且不缩进」的
+# 最差形态，比单行和标准两行都难读。
+AllowShortIfStatementsOnASingleLine: WithoutElse
 
 # 禁止单行 for/while
 AllowShortLoopsOnASingleLine: false
